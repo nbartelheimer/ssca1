@@ -1,14 +1,27 @@
-find_path(
-  GPI2_INCLUDE_DIR
-  NAMES "GASPI.h"
-  PATH_SUFFIXES "include"
+find_path(GPI2_INCLUDE_DIR
+  NAMES GASPI.h
+  PATHS
+    /usr/local/include
+    /usr/include
+    ENV GPI2_INCLUDE_DIR
 )
 
-find_library(
-  GPI2_LIBRARY
-  NAMES libGPI-2.so libGPI2.so libGPI2.a GPI2
-  PATH_SUFFIXES "lib" "lib64"
+find_library(GPI2_LIBRARY
+  NAMES libGPI2.so libGPI2.a
+  PATHS
+    /usr/local/lib
+    /usr/lib
+    ENV GPI2_LIBRARY_DIR
 )
+
+if(GPI2_INCLUDE_DIR)
+	message(STATUS "Foud Include ${GPI2_INCLUDE_DIR}")
+endif()
+
+if(GPI2_LIBRARY)
+	message(STATUS "Foud Library ${GPI2_LIBRARY}")
+endif()
+
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(
