@@ -154,22 +154,23 @@ main(int argc, char** argv)
   start_pes(0);
   num_nodes = shmem_n_pes();
   rank = shmem_my_pe();
-  if(rank == 0)
+  if(rank == 0){
     printf("Running with OpenSHMEM, npes = %i\n", num_nodes);
+  }
 #elif USE_GASPI
+#ifdef USE_GASPI_MPI
+#include <mpi.h>
+  MPI_Init(&argc,&argv);
+#endif
+  segment_id = 0;
+  queue = 0;
   GASPI_CHECK(gaspi_proc_init(GASPI_BLOCK));
   GASPI_CHECK(gaspi_proc_rank((gaspi_rank_t*)&rank));
   GASPI_CHECK(gaspi_proc_num((gaspi_rank_t*)&num_nodes));
-  segment_id = 0;
-  queue = 0;
   segment_size = 1000000;
   GASPI_CHECK(gaspi_segment_create(segment_id, segment_size, GASPI_GROUP_ALL,
                                    GASPI_BLOCK, GASPI_MEM_INITIALIZED));
   GASPI_CHECK(gaspi_segment_ptr(segment_id, &segment_base));
-  if(segment_base == NULL){
-	  fprintf(stderr,"FAIL\n");
-	  return -1;
-  }
   next_segment_address = segment_base;
   if(0 == rank)
   {
@@ -304,6 +305,16 @@ main(int argc, char** argv)
   BARRIER_ALL();
 #ifdef USE_MPI
   MPI_Win_unlock_all(window);
+  MPI_Win_free(&window);
+  MPI_Finalize();
+#elif USE_SHMEM
+  shmem_finalize();
+#elif USE_GASPI
+  GASPI_CHECK(gaspi_segment_delete(segment_id));
+  GASPI_CHECK(gaspi_proc_term(GASPI_BLOCK));
+#ifdef USE_GASPI_MPI
+  MPI_Finalize();
+#endif
 #endif
 
   return 0;
