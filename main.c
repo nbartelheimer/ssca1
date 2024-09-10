@@ -154,13 +154,14 @@ main(int argc, char** argv)
   start_pes(0);
   num_nodes = shmem_n_pes();
   rank = shmem_my_pe();
-  if(rank == 0){
+  if(rank == 0)
+  {
     printf("Running with OpenSHMEM, npes = %i\n", num_nodes);
   }
 #elif USE_GASPI
 #ifdef USE_GASPI_MPI
 #include <mpi.h>
-  MPI_Init(&argc,&argv);
+  MPI_Init(&argc, &argv);
 #endif
   segment_id = 0;
   queue = 0;
@@ -172,7 +173,7 @@ main(int argc, char** argv)
                                    GASPI_BLOCK, GASPI_MEM_INITIALIZED));
   GASPI_CHECK(gaspi_segment_ptr(segment_id, &segment_base));
   next_segment_address = segment_base;
-  malloc_all(4096,(void**)&message_buffer);
+  malloc_all(4096, (void**)&message_buffer);
   loc_offset = message_buffer - segment_base;
   if(0 == rank)
   {

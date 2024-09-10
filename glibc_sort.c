@@ -3,8 +3,8 @@
 
    Copyright (C) 2008-2015, UT-Battelle, LLC.
 
-   This product includes software produced by UT-Battelle, LLC under Contract No.
-   DE-AC05-00OR22725 with the Department of Energy.
+   This product includes software produced by UT-Battelle, LLC under Contract
+   No. DE-AC05-00OR22725 with the Department of Energy.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the New BSD 3-clause software license (LICENSE).
@@ -23,16 +23,19 @@
 
 /* function to be passed to to glibc's qsort function */
 
-int sort_cmp(const void *first, const void *second)
+int
+sort_cmp(const void* first, const void* second)
 {
-  index_t *number_a = (index_t *)first;
-  index_t *number_b = (index_t *)second;
+  index_t* number_a = (index_t*)first;
+  index_t* number_b = (index_t*)second;
   return (int)(((score_t)*number_a) - ((score_t)*number_b));
 }
 
-int ends_cmp(const void *first, const void *second){
-  sort_ends_t *end_a = (sort_ends_t *)first;
-  sort_ends_t *end_b = (sort_ends_t *)second;
+int
+ends_cmp(const void* first, const void* second)
+{
+  sort_ends_t* end_a = (sort_ends_t*)first;
+  sort_ends_t* end_b = (sort_ends_t*)second;
   return (int)(end_b->score - end_a->score);
 }
 
@@ -44,7 +47,8 @@ int ends_cmp(const void *first, const void *second){
          int *numbers   - sorted values
 */
 
-void sort(index_t numbers[], index_t array_size)
+void
+sort(index_t numbers[], index_t array_size)
 {
   qsort(numbers, array_size, sizeof(index_t), sort_cmp);
 }
@@ -59,24 +63,27 @@ void sort(index_t numbers[], index_t array_size)
          int *indexes   - the index where the value used to be before sorting
 */
 
-void index_sort(score_t numbers[], index_t indexes[], index_t array_size)
+void
+index_sort(score_t numbers[], index_t indexes[], index_t array_size)
 {
   index_t big_index[array_size][2];
-  for(index_t idx=0; idx < array_size; idx++)
+  for(index_t idx = 0; idx < array_size; idx++)
   {
     big_index[idx][0] = (index_t)numbers[idx];
     big_index[idx][1] = idx;
   }
 
-  qsort(big_index, array_size, sizeof(index_t)*2, sort_cmp);
+  qsort(big_index, array_size, sizeof(index_t) * 2, sort_cmp);
 
-  for(int idx=0; idx < array_size; idx++)
+  for(int idx = 0; idx < array_size; idx++)
   {
     numbers[idx] = (score_t)big_index[idx][0];
     indexes[idx] = big_index[idx][1];
   }
 }
 
-void ends_sort(sort_ends_t *ends, index_t array_size){
+void
+ends_sort(sort_ends_t* ends, index_t array_size)
+{
   qsort(ends, array_size, sizeof(sort_ends_t), ends_cmp);
 }
