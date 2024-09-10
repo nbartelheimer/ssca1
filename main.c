@@ -172,6 +172,8 @@ main(int argc, char** argv)
                                    GASPI_BLOCK, GASPI_MEM_INITIALIZED));
   GASPI_CHECK(gaspi_segment_ptr(segment_id, &segment_base));
   next_segment_address = segment_base;
+  malloc_all(4096,(void**)&message_buffer);
+  loc_offset = message_buffer - segment_base;
   if(0 == rank)
   {
     printf("Running with GASPI, world size is %d\n", num_nodes);

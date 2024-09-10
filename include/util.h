@@ -37,12 +37,16 @@ extern MPI_Request request;
 #include <shmem.h>
 #elif USE_GASPI
 #include <GASPI.h>
+#include <GASPI_Ext.h>
 #include <assert.h>
+#include <string.h>
 extern gaspi_segment_id_t segment_id;
 extern gaspi_queue_id_t queue;
 extern gaspi_size_t segment_size;
 extern gaspi_pointer_t segment_base;
 extern gaspi_pointer_t next_segment_address;
+extern gaspi_pointer_t message_buffer;
+extern gaspi_offset_t loc_offset;
 
 #define GASPI_CHECK(stmt)                                                      \
   do                                                                           \
@@ -50,9 +54,9 @@ extern gaspi_pointer_t next_segment_address;
     const gaspi_return_t gaspi_err = (stmt);                                   \
     if(gaspi_err != GASPI_SUCCESS)                                             \
     {                                                                          \
-      fprintf(stderr, "[%s:%d]: GASPI call failed with %d \n", __FILE__,       \
-              __LINE__, gaspi_err);                                            \
-                                                                               \
+      fprintf(stderr, "[%s:%d]: GASPI call failed with: %s \n", __FILE__,       \
+              __LINE__, gaspi_error_str(gaspi_err));                                            \
+      fflush(stderr);                                                                         \
       exit(EXIT_FAILURE);                                                      \
     }                                                                          \
     assert(gaspi_err == GASPI_SUCCESS);                                        \
@@ -69,10 +73,11 @@ extern gaspi_pointer_t next_segment_address;
   shmem_short_get(target, source, num_elems, pe)
 #elif USE_GASPI
 #define SHORT_GET(target, source, num_elems, rank)                             \
-  GASPI_CHECK(gaspi_read(segment_id, (gaspi_pointer_t)source - segment_base, rank,       \
-                         segment_id, (gaspi_pointer_t)target - segment_base,             \
+  GASPI_CHECK(gaspi_read(segment_id, loc_offset, rank,       \
+                         segment_id, (gaspi_pointer_t)source - segment_base,             \
                          num_elems * sizeof(short), queue, GASPI_BLOCK));      \
-  QUIET()
+  QUIET(); \
+  memcpy((void*)target,(void*)message_buffer,num_elems * sizeof(short));
 #endif
 #ifdef USE_MPI
 #define SHORT_GET_NB(target, source, num_elems, rank)                          \
@@ -98,10 +103,11 @@ extern gaspi_pointer_t next_segment_address;
   shmem_long_get((long*)target, (long*)source, num_elems, pe)
 #elif USE_GASPI
 #define LONG_GET(target, source, num_elems, rank)                              \
-  GASPI_CHECK(gaspi_read(segment_id, (gaspi_pointer_t)source - segment_base, rank,       \
-                         segment_id, (gaspi_pointer_t)target - segment_base,             \
+  GASPI_CHECK(gaspi_read(segment_id, loc_offset, rank,       \
+                         segment_id, (gaspi_pointer_t)source - segment_base,             \
                          num_elems * sizeof(long), queue, GASPI_BLOCK));       \
-  QUIET()
+  QUIET(); \
+  memcpy((void*)target,(void*)message_buffer,num_elems * sizeof(long));
 #endif
 
 #ifdef USE_MPI
@@ -114,10 +120,11 @@ extern gaspi_pointer_t next_segment_address;
   shmem_getmem(target, source, length, pe)
 #elif USE_GASPI
 #define GETMEM(target, source, length, rank)                                   \
-  GASPI_CHECK(gaspi_read(segment_id, (gaspi_pointer_t)source - segment_base, rank,       \
-                         segment_id, (gaspi_pointer_t)target - segment_base, length,     \
+  GASPI_CHECK(gaspi_read(segment_id, loc_offset, rank,       \
+                         segment_id, (gaspi_pointer_t)source - segment_base, length,     \
                          queue, GASPI_BLOCK));                                 \
-  QUIET()
+  QUIET(); \
+  memcpy((void*)target,(void*)message_buffer,length);
 #endif
 
 #ifdef USE_MPI
@@ -130,7 +137,8 @@ extern gaspi_pointer_t next_segment_address;
   shmem_short_put(target, source, num_elems, pe)
 #elif USE_GASPI
 #define SHORT_PUT(target, source, num_elems, rank)                             \
-  GASPI_CHECK(gaspi_write(segment_id, (gaspi_pointer_t)source - segment_base, rank,      \
+  memcpy((void*)message_buffer,(void*)source,num_elems*sizeof(short)); \
+  GASPI_CHECK(gaspi_write(segment_id, loc_offset, rank,      \
                           segment_id, (gaspi_pointer_t)target - segment_base,            \
                           num_elems * sizeof(short), queue, GASPI_BLOCK));     \
   QUIET()
@@ -187,7 +195,6 @@ malloc_all(size_t size, void** address)
 {
   *address = next_segment_address;
   next_segment_address += size;
-  printf("Allocating memory\n");
   GASPI_CHECK(gaspi_barrier(GASPI_GROUP_ALL, GASPI_BLOCK));
   if(next_segment_address - segment_base > segment_size)
   {

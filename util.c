@@ -41,6 +41,8 @@ gaspi_queue_id_t queue;
 gaspi_size_t segment_size;
 gaspi_pointer_t segment_base;
 gaspi_pointer_t next_segment_address;
+gaspi_pointer_t message_buffer;
+gaspi_offset_t loc_offset;
 #endif
 
 #ifdef USE_SHMEM
