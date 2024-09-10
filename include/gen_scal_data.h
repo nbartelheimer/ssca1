@@ -3,8 +3,8 @@
 
    Copyright (C) 2008-2015, UT-Battelle, LLC.
 
-   This product includes software produced by UT-Battelle, LLC under Contract No.
-   DE-AC05-00OR22725 with the Department of Energy.
+   This product includes software produced by UT-Battelle, LLC under Contract
+   No. DE-AC05-00OR22725 with the Department of Energy.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the New BSD 3-clause software license (LICENSE).
@@ -44,8 +44,9 @@ typedef struct _seq_data
 } seq_data_t;
 */
 
-seq_data_t *gen_scal_data( sim_matrix_t *simMatrix, index_t mainLen, index_t matchLen, int constant_rng);
-void release_scal_data(seq_data_t *doomed_scal_data);
-void verifyData(sim_matrix_t *simMatrix, seq_data_t *seqData);
+seq_data_t* gen_scal_data(sim_matrix_t* simMatrix, index_t mainLen,
+                          index_t matchLen, int constant_rng);
+void release_scal_data(seq_data_t* doomed_scal_data);
+void verifyData(sim_matrix_t* simMatrix, seq_data_t* seqData);
 
 #endif

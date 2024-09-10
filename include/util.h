@@ -54,9 +54,9 @@ extern gaspi_offset_t loc_offset;
     const gaspi_return_t gaspi_err = (stmt);                                   \
     if(gaspi_err != GASPI_SUCCESS)                                             \
     {                                                                          \
-      fprintf(stderr, "[%s:%d]: GASPI call failed with: %s \n", __FILE__,       \
-              __LINE__, gaspi_error_str(gaspi_err));                                            \
-      fflush(stderr);                                                                         \
+      fprintf(stderr, "[%s:%d]: GASPI call failed with: %s \n", __FILE__,      \
+              __LINE__, gaspi_error_str(gaspi_err));                           \
+      fflush(stderr);                                                          \
       exit(EXIT_FAILURE);                                                      \
     }                                                                          \
     assert(gaspi_err == GASPI_SUCCESS);                                        \
@@ -73,11 +73,11 @@ extern gaspi_offset_t loc_offset;
   shmem_short_get(target, source, num_elems, pe)
 #elif USE_GASPI
 #define SHORT_GET(target, source, num_elems, rank)                             \
-  GASPI_CHECK(gaspi_read(segment_id, loc_offset, rank,       \
-                         segment_id, (gaspi_pointer_t)source - segment_base,             \
+  GASPI_CHECK(gaspi_read(segment_id, loc_offset, rank, segment_id,             \
+                         (gaspi_pointer_t)source - segment_base,               \
                          num_elems * sizeof(short), queue, GASPI_BLOCK));      \
-  QUIET(); \
-  memcpy((void*)target,(void*)message_buffer,num_elems * sizeof(short));
+  QUIET();                                                                     \
+  memcpy((void*)target, (void*)message_buffer, num_elems * sizeof(short));
 #endif
 #ifdef USE_MPI
 #define SHORT_GET_NB(target, source, num_elems, rank)                          \
@@ -88,8 +88,9 @@ extern gaspi_offset_t loc_offset;
   shmem_short_get_nbi(target, source, num_elems, pe)
 #elif USE_GASPI
 #define SHORT_GET_NB(target, source, num_elems, rank)                          \
-  GASPI_CHECK(gaspi_read(segment_id, (gaspi_pointer_t)source - segment_base, rank,       \
-                         segment_id, (gaspi_pointer_t)target - segment_base,             \
+  GASPI_CHECK(gaspi_read(segment_id, (gaspi_pointer_t)source - segment_base,   \
+                         rank, segment_id,                                     \
+                         (gaspi_pointer_t)target - segment_base,               \
                          num_elems * sizeof(short), queue, GASPI_TEST))
 #endif
 
@@ -103,11 +104,11 @@ extern gaspi_offset_t loc_offset;
   shmem_long_get((long*)target, (long*)source, num_elems, pe)
 #elif USE_GASPI
 #define LONG_GET(target, source, num_elems, rank)                              \
-  GASPI_CHECK(gaspi_read(segment_id, loc_offset, rank,       \
-                         segment_id, (gaspi_pointer_t)source - segment_base,             \
+  GASPI_CHECK(gaspi_read(segment_id, loc_offset, rank, segment_id,             \
+                         (gaspi_pointer_t)source - segment_base,               \
                          num_elems * sizeof(long), queue, GASPI_BLOCK));       \
-  QUIET(); \
-  memcpy((void*)target,(void*)message_buffer,num_elems * sizeof(long));
+  QUIET();                                                                     \
+  memcpy((void*)target, (void*)message_buffer, num_elems * sizeof(long));
 #endif
 
 #ifdef USE_MPI
@@ -120,11 +121,11 @@ extern gaspi_offset_t loc_offset;
   shmem_getmem(target, source, length, pe)
 #elif USE_GASPI
 #define GETMEM(target, source, length, rank)                                   \
-  GASPI_CHECK(gaspi_read(segment_id, loc_offset, rank,       \
-                         segment_id, (gaspi_pointer_t)source - segment_base, length,     \
+  GASPI_CHECK(gaspi_read(segment_id, loc_offset, rank, segment_id,             \
+                         (gaspi_pointer_t)source - segment_base, length,       \
                          queue, GASPI_BLOCK));                                 \
-  QUIET(); \
-  memcpy((void*)target,(void*)message_buffer,length);
+  QUIET();                                                                     \
+  memcpy((void*)target, (void*)message_buffer, length);
 #endif
 
 #ifdef USE_MPI
@@ -137,9 +138,9 @@ extern gaspi_offset_t loc_offset;
   shmem_short_put(target, source, num_elems, pe)
 #elif USE_GASPI
 #define SHORT_PUT(target, source, num_elems, rank)                             \
-  memcpy((void*)message_buffer,(void*)source,num_elems*sizeof(short)); \
-  GASPI_CHECK(gaspi_write(segment_id, loc_offset, rank,      \
-                          segment_id, (gaspi_pointer_t)target - segment_base,            \
+  memcpy((void*)message_buffer, (void*)source, num_elems * sizeof(short));     \
+  GASPI_CHECK(gaspi_write(segment_id, loc_offset, rank, segment_id,            \
+                          (gaspi_pointer_t)target - segment_base,              \
                           num_elems * sizeof(short), queue, GASPI_BLOCK));     \
   QUIET()
 #endif
